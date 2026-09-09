@@ -13,16 +13,12 @@ services:
       - key: MONGO_URI
         sync: false
 
-  - type: web
+  - type: static_site
     name: concierge-mvp-client
-    runtime: static
     plan: free
     rootDir: client
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: concierge-mvp-api
-          property: host
+        value: https://concierge-mvp-api.onrender.com/api
