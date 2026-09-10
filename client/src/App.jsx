@@ -9,6 +9,7 @@ function App() {
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState(EMPTY_MESSAGE)
+  const [searchTerm, setSearchTerm] = useState('')
   const [newBookForm, setNewBookForm] = useState({ title: '', quantity: '' })
   const [updateForm, setUpdateForm] = useState({
     bookId: '',
@@ -34,6 +35,10 @@ function App() {
   useEffect(() => {
     fetchBooks()
   }, [])
+
+  const filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchTerm.trim().toLowerCase()),
+  )
 
   const handleAddBook = async (event) => {
     event.preventDefault()
@@ -162,7 +167,7 @@ function App() {
         ) : null}
 
         <div className="grid gap-6 lg:grid-cols-[1.35fr_0.75fr]">
-          <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <section className="order-2 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 lg:order-1">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-semibold text-slate-900">Inventory</h2>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
@@ -170,10 +175,25 @@ function App() {
               </span>
             </div>
 
+            <label className="mb-4 block">
+              <span className="mb-1 block text-sm font-medium text-slate-700">
+                Search books
+              </span>
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                placeholder="Search books..."
+              />
+            </label>
+
             {loading ? (
               <p className="text-slate-500">Loading inventory...</p>
             ) : books.length === 0 ? (
               <p className="text-slate-500">No books have been added yet.</p>
+            ) : filteredBooks.length === 0 ? (
+              <p className="text-slate-500">No books found.</p>
             ) : (
               <div className="overflow-hidden rounded-xl border border-slate-200">
                 <table className="inventory-table">
@@ -184,7 +204,7 @@ function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {books.map((book) => (
+                    {filteredBooks.map((book) => (
                       <tr key={book._id}>
                         <td className="font-medium text-slate-800">{book.title}</td>
                         <td className="text-slate-700">{book.quantity}</td>
@@ -196,7 +216,7 @@ function App() {
             )}
           </section>
 
-          <aside className="space-y-6">
+          <aside className="order-1 space-y-6 lg:order-2">
             <form
               onSubmit={handleAddBook}
               className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
