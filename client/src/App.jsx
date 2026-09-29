@@ -3,25 +3,27 @@ import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
+console.log('API_URL:', API_URL);
+
 const EMPTY_MESSAGE = { type: '', text: '' }
 
 function App() {
-  const [books, setBooks] = useState([])
+  const [parts, setParts] = useState([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState(EMPTY_MESSAGE)
   const [searchTerm, setSearchTerm] = useState('')
-  const [newBookForm, setNewBookForm] = useState({ title: '', quantity: '' })
+  const [newPartForm, setNewPartForm] = useState({ title: '', quantity: '' })
   const [updateForm, setUpdateForm] = useState({
-    bookId: '',
+    partId: '',
     action: 'add',
     quantity: '',
   })
 
-  const fetchBooks = async () => {
+  const fetchParts = async () => {
     try {
       const response = await fetch(`${API_URL}/books`)
       const data = await response.json()
-      setBooks(data)
+      setParts(data)
     } catch (error) {
       setMessage({
         type: 'error',
@@ -33,21 +35,21 @@ function App() {
   }
 
   useEffect(() => {
-    fetchBooks()
+    fetchParts()
   }, [])
 
-  const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.trim().toLowerCase()),
+  const filteredParts = parts.filter((part) =>
+    part.title.toLowerCase().includes(searchTerm.trim().toLowerCase()),
   )
 
-  const handleAddBook = async (event) => {
+  const handleAddPart = async (event) => {
     event.preventDefault()
 
-    const title = newBookForm.title.trim()
-    const quantity = Number(newBookForm.quantity)
+    const title = newPartForm.title.trim()
+    const quantity = Number(newPartForm.quantity)
 
     if (!title) {
-      setMessage({ type: 'error', text: 'Book title is required.' })
+      setMessage({ type: 'error', text: 'Part title is required.' })
       return
     }
 
@@ -71,13 +73,13 @@ function App() {
       if (!response.ok) {
         setMessage({
           type: 'error',
-          text: data.message || 'Unable to add the book right now.',
+          text: data.message || 'Unable to add the part right now.',
         })
         return
       }
 
-      setBooks((current) => [data, ...current])
-      setNewBookForm({ title: '', quantity: '' })
+      setParts((current) => [data, ...current])
+      setNewPartForm({ title: '', quantity: '' })
       setMessage({
         type: 'success',
         text: `${data.title} was added with ${data.quantity} copies.`,
@@ -85,7 +87,7 @@ function App() {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: 'Unable to add the book right now.',
+        text: 'Unable to add the part right now.',
       })
     }
   }
@@ -95,8 +97,8 @@ function App() {
 
     const quantity = Number(updateForm.quantity)
 
-    if (!updateForm.bookId) {
-      setMessage({ type: 'error', text: 'Select a book before updating stock.' })
+    if (!updateForm.partId) {
+      setMessage({ type: 'error', text: 'Select a part before updating stock.' })
       return
     }
 
@@ -111,7 +113,7 @@ function App() {
     const action = updateForm.action === 'add' ? 'add-stock' : 'sell'
 
     try {
-      const response = await fetch(`${API_URL}/books/${updateForm.bookId}/${action}`, {
+      const response = await fetch(`${API_URL}/books/${updateForm.partId}/${action}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity }),
@@ -127,15 +129,15 @@ function App() {
         return
       }
 
-      setBooks((current) =>
-        current.map((book) => (book._id === data._id ? data : book)),
+      setParts((current) =>
+        current.map((part) => (part._id === data._id ? data : part)),
       )
       setUpdateForm((current) => ({ ...current, quantity: '' }))
       setMessage({
         type: 'success',
         text:
           updateForm.action === 'add'
-            ? `Added ${quantity} copies to the selected book.`
+            ? `Added ${quantity} copies to the selected part.`
             : `Recorded a sale of ${quantity} copies.`,
       })
     } catch (error) {
@@ -150,9 +152,9 @@ function App() {
     <div className="min-h-screen bg-slate-100 text-slate-800">
       <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
         <header className="mb-6 rounded-2xl bg-slate-900 p-6 text-white shadow-sm">
-          <h1 className="text-2xl font-bold md:text-3xl">Mrs Anthonia's Book Inventory</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">Engr. Seyi's Phone Part Inventory</h1>
           <p className="mt-2 text-sm text-slate-300">
-            Update your book inventory at any time with ease.
+            Update your phone part inventory at any time with ease.
           </p>
         </header>
 
@@ -171,43 +173,43 @@ function App() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-semibold text-slate-900">Inventory</h2>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-                {books.length} books
+                {parts.length} parts
               </span>
             </div>
 
             <label className="mb-4 block">
               <span className="mb-1 block text-sm font-medium text-slate-700">
-                Search books
+                Search parts
               </span>
               <input
                 type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                placeholder="Search books..."
+                placeholder="Search parts..."
               />
             </label>
 
             {loading ? (
               <p className="text-slate-500">Loading inventory...</p>
-            ) : books.length === 0 ? (
-              <p className="text-slate-500">No books have been added yet.</p>
-            ) : filteredBooks.length === 0 ? (
-              <p className="text-slate-500">No books found.</p>
+            ) : parts.length === 0 ? (
+              <p className="text-slate-500">No parts have been added yet.</p>
+            ) : filteredParts.length === 0 ? (
+              <p className="text-slate-500">No parts found.</p>
             ) : (
               <div className="overflow-hidden rounded-xl border border-slate-200">
                 <table className="inventory-table">
                   <thead>
                     <tr>
-                      <th>Book name</th>
+                      <th>Part name</th>
                       <th>Current stock</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredBooks.map((book) => (
-                      <tr key={book._id}>
-                        <td className="font-medium text-slate-800">{book.title}</td>
-                        <td className="text-slate-700">{book.quantity}</td>
+                    {filteredParts.map((part) => (
+                      <tr key={part._id}>
+                        <td className="font-medium text-slate-800">{part.title}</td>
+                        <td className="text-slate-700">{part.quantity}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -218,27 +220,27 @@ function App() {
 
           <aside className="order-1 space-y-6 lg:order-2">
             <form
-              onSubmit={handleAddBook}
+              onSubmit={handleAddPart}
               className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
             >
-              <h2 className="text-xl font-semibold text-slate-900">Add New Book</h2>
+              <h2 className="text-xl font-semibold text-slate-900">Add New Part</h2>
 
               <div className="mt-4 space-y-4">
                 <label className="block">
                   <span className="mb-1 block text-sm font-medium text-slate-700">
-                    Book title
+                    Part name
                   </span>
                   <input
                     type="text"
-                    value={newBookForm.title}
+                    value={newPartForm.name}
                     onChange={(event) =>
-                      setNewBookForm((current) => ({
+                      setNewPartForm((current) => ({
                         ...current,
                         title: event.target.value,
                       }))
                     }
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                    placeholder="e.g. The Alchemist"
+                    placeholder="e.g. iPhone 17 Pro Max Screens"
                   />
                 </label>
 
@@ -249,9 +251,9 @@ function App() {
                   <input
                     type="number"
                     min="1"
-                    value={newBookForm.quantity}
+                    value={newPartForm.quantity}
                     onChange={(event) =>
-                      setNewBookForm((current) => ({
+                      setNewPartForm((current) => ({
                         ...current,
                         quantity: event.target.value,
                       }))
@@ -266,7 +268,7 @@ function App() {
                 type="submit"
                 className="mt-4 w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
               >
-                Add book
+                Add part
               </button>
             </form>
 
@@ -279,22 +281,22 @@ function App() {
               <div className="mt-4 space-y-4">
                 <label className="block">
                   <span className="mb-1 block text-sm font-medium text-slate-700">
-                    Select book
+                    Select part
                   </span>
                   <select
-                    value={updateForm.bookId}
+                    value={updateForm.partId}
                     onChange={(event) =>
                       setUpdateForm((current) => ({
                         ...current,
-                        bookId: event.target.value,
+                        partId: event.target.value,
                       }))
                     }
                     className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   >
-                    <option value="">Choose a book</option>
-                    {books.map((book) => (
-                      <option key={book._id} value={book._id}>
-                        {book.title}
+                    <option value="">Choose a part</option>
+                    {parts.map((part) => (
+                      <option key={part._id} value={part._id}>
+                        {part.name}
                       </option>
                     ))}
                   </select>
